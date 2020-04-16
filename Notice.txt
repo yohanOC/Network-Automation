@@ -1,0 +1,17 @@
+Requirement Before running this script *
+
+**************************************************
+
+1. Install expect in your system
+	- sudo apt-get update
+	- sudo apt-get install expect
+2. Make sure installation completed
+	- dpkg -s expect
+3. Create folder for devices list, configuration file, and file destination for output script
+4. Create ip list with format (ip=vendor=remote_access, eg 10.2.2.1=catalys=ssh)
+5. Create .sh file for automatic create and delete folder
+6. Run all script(.sh and .exp) using cronjob with date and time you need.
+
+*************************************************
+
+Created by Yohan.

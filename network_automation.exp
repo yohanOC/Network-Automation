@@ -1,0 +1,118 @@
+#!/usr/bin/expect -f
+
+ #set time 06
+ set time [exec date "+%d"]
+ set output [exec date "+%b"]
+ set fd "/home/device_list/$time"
+ set fp [open "$fd" r]
+ set data [read $fp]
+ #split ip vendor and remote access
+ set data_ok [split $data "\n"]
+ set nonremote \[[join $data , ]\]
+ #open configuration for catalist
+ set fc "/home/Configuration/3750.txt"
+ set fca [open "$fc" r]
+ set fcat [read $fca]
+ close $fca
+ #open configurasi for H3C
+ set fh3c "/home/Configuration/h3c.txt"
+ set fh3cc [open "$fh3c" r]
+ set ch3c [read $fh3cc]
+ close $fh3cc
+
+ #set variable
+ set username_cisco "cisco"
+ set password_cisco "cisco"
+ set user_h3c "admin"
+ set pass_h3c "admin"
+ set enablepassword "admin"
+ set dir "/home/file/$output"
+ close $fp
+
+ 
+#procedure for remote and configure
+proc func_remote { ip vendor remote username_cisco password_cisco enable user_h3c pass_h3c config_3750 config_h3c } {
+    #set global variable on expect
+    global spawn_id
+    set host $ip
+    set vendor $vendor
+    set remote $remote   
+    set prom "#|>"
+    #condition formation devices
+    if { $remote == "telnet" && $vendor == "h3c" } {
+        set username_h3c $user_h3c
+        set password_h3c $pass_h3c
+        set config $config_h3c
+        spawn telnet $host
+        expect "*sername:"
+        send "$username_h3c\n"
+        expect "*assword:"
+        send "$password_h3c\n"
+        expect -re $prom
+        send "$config"
+    } elseif { $remote == "ssh" && $vendor == "catalys" } {
+        set username_cisco $username_cisco
+        set password_cisco $password_cisco
+        set enable $enable
+        set config $config_3750
+        spawn ssh -o StrictHostKeyChecking=no $username_cisco\@$host
+        expect "*assword:"
+        send "$password_cisco\n"
+        expect -re $prom
+        send "enable\n"
+        expect "*assword"
+        send "$enable\n"
+        expect -re $prom
+        send "$config"
+    } else {
+        set pass_cisco_tel $pass_cisco_tel
+        set enable $enable
+        set config $config_3750
+        spawn telnet $host
+        expect "*assword:"
+        send "$pass_cisco_tel\n"
+        expect -re $prom
+        send "$config"
+    } 
+
+}
+
+#procedure for info message ok or failed
+proc func_failed_message { host vendor url chat_id} {
+
+    set host $host
+    set vendor $vendor
+    puts "$host $vendor"
+}
+
+proc func_ok_message { host vendor url chat_id} {
+
+    set host $host
+    set vendor $vendor
+    puts "$host $vendor"
+}
+
+#running program check from device list 
+foreach ping $data_ok {
+  #split ip list
+  set ping [split $ping "="]
+  #set variable from split file
+  set ip [lindex $ping 0]
+  set vendor [lindex $ping 1]
+  set remote [lindex $ping 2]
+  #ping to make sure the devices is up
+  set ping_out [catch [list exec ping -c 2 $ip] output]
+  #condition if devices up will be continues script
+  if {$ping_out == 0} {
+    exp_log_file -noappend "$dir/$time-$ip.txt"
+    func_remote ip $vendor $remote $username_cisco $password_cisco $enablepassword $user_h3c $pass_h3c $fcat $ch3c
+    expect eof
+    exp_log_file
+    func_ok_message $ip $vendor $URL $chat_id
+  } else {
+    set ip $ip
+    set vendor $vendor
+    func_failed_message $ip $vendor 
+  }
+}
+
