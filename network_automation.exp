@@ -78,14 +78,14 @@ proc func_remote { ip vendor remote username_cisco password_cisco enable user_h3
 }
 
 #procedure for info message ok or failed
-proc func_failed_message { host vendor url chat_id} {
+proc func_failed_message { host vendor } {
 
     set host $host
     set vendor $vendor
     puts "$host $vendor"
 }
 
-proc func_ok_message { host vendor url chat_id} {
+proc func_ok_message { host vendor } {
 
     set host $host
     set vendor $vendor
