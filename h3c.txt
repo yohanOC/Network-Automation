@@ -1,5 +1,0 @@
-dis cpu
-########### STATUS MEMORY ###############
-dis mem
-############FINISH#####################
-quit
