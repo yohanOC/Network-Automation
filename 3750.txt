@@ -1,0 +1,6 @@
+terminal length 0
+sh clock
+sh env all
+sh processes cpu history
+terminal length 25
+exit
