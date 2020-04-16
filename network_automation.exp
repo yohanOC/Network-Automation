@@ -108,7 +108,7 @@ foreach ping $data_ok {
     func_remote ip $vendor $remote $username_cisco $password_cisco $enablepassword $user_h3c $pass_h3c $fcat $ch3c
     expect eof
     exp_log_file
-    func_ok_message $ip $vendor $URL $chat_id
+    func_ok_message $ip $vendor
   } else {
     set ip $ip
     set vendor $vendor
